@@ -90,8 +90,18 @@ function(input, output, session) {
       if(length(grep("meta", f)) > 0) next
       df <- rbind(df, read.csv(f))
     }
+    if(!is.null(df))
+      df %>% left_join(parcels.attr, by = "parcel_id")
   })
   
+  observe({
+    data <- bldg.data()
+    if (is.null(data)) return()
+    subdata <- subset(data, year_built == input$year)
+    if (is.null(subdata)) return()
+    marker.popup <- ~paste0("<strong>Parcel ID: </strong>", as.character(parcel_id))
+    leaflet.results(leafletProxy("map"), subdata, marker.popup)
+  })
   
 }# end server function
 
