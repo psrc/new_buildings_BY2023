@@ -88,18 +88,25 @@ function(input, output, session) {
     df <- NULL
     for(f in files) {
       if(length(grep("meta", f)) > 0) next
-      df <- rbind(df, read.csv(f))
+      #df <- rbind(df, read.csv(f, sep="\t", header = TRUE))
+      df <- rbind(df, fread(f, sep="\t", header = TRUE))
     }
-    if(!is.null(df))
+    if(!is.null(df)) {
+        #browser()
       df %>% left_join(parcels.attr, by = "parcel_id")
+    }
   })
   
   observe({
     data <- bldg.data()
     if (is.null(data)) return()
-    subdata <- subset(data, year_built == input$year)
+    bins <- c(2014, seq(2015, 2040, by=5))
+    which.bin <- cut(input$year, bins, labels=FALSE)+1
+    subdata <- subset(data, year_built > bins[which.bin-1] & year_built <= bins[which.bin])
     if (is.null(subdata)) return()
-    marker.popup <- ~paste0("<strong>Parcel ID: </strong>", as.character(parcel_id))
+    #browser()
+    marker.popup <- ~paste0("<strong>Parcel ID: </strong><br>", as.character(parcel_id), 
+                            "Year built: ", as.integer(year_built))
     leaflet.results(leafletProxy("map"), subdata, marker.popup)
   })
   

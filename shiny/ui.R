@@ -8,10 +8,10 @@ navbarPage(theme = shinytheme("simplex"),
                                uiOutput("select_run"), # dynamic, lists runs on modelsrv8
                                sliderInput(inputId = "year",
                                            label = "Year",
-                                           min = 2014,
+                                           min = 2015,
                                            max = 2040,
                                            value = 2015,
-                                           step = 1,
+                                           step = 5,
                                            sep = "", animate = TRUE)
                         ),
                         column(width = 9,
