@@ -8,6 +8,7 @@ library(DT)
 base.ind.dir <- "/media/modelsrv8d/opusgit/urbansim_data/data/psrc_parcel/runs"
 base.ind.dir <- "/Volumes/d$/opusgit/urbansim_data/data/psrc_parcel/runs"
 #base.ind.dir <- "/Users/hana/d$/opusgit/urbansim_data/data/psrc_parcel/runs"
+#base.ind.dir <- "~/tmpind"
              
 
 #wrkdir <- '/home/shiny/apps/' # shiny path

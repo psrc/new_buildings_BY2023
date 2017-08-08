@@ -22,13 +22,16 @@ function(input, output, session) {
   }
   
   # show leaflet results
-  leaflet.results <- function(proxy, selected.data, popup) {
+  leaflet.results <- function(proxy, selected.data, popup, add=FALSE, col="black") {
+    if(!add) proxy <- proxy %>% clearMarkers()
     proxy %>% 
-      clearMarkers() %>%
-      addMarkers(data = selected.data,
+      addCircleMarkers(data = selected.data,
                  ~long,
                  ~lat,
-                 popup = popup
+                 radius = 3,
+                 popup = popup,
+                fillOpacity=0.4,
+                color=col
       ) 
   }  
   
@@ -101,13 +104,15 @@ function(input, output, session) {
     data <- bldg.data()
     if (is.null(data)) return()
     bins <- c(2014, seq(2015, 2040, by=5))
+    cols <- rainbow(length(bins))
     which.bin <- cut(input$year, bins, labels=FALSE)+1
     subdata <- subset(data, year_built > bins[which.bin-1] & year_built <= bins[which.bin])
     if (is.null(subdata)) return()
     #browser()
-    marker.popup <- ~paste0("<strong>Parcel ID: </strong><br>", as.character(parcel_id), 
-                            "Year built: ", as.integer(year_built))
-    leaflet.results(leafletProxy("map"), subdata, marker.popup)
+    marker.popup <- ~paste0("Parcel ID: ", as.character(parcel_id), 
+                            "<br>Year built: ", as.integer(year_built),
+                            "<br>Bld type:   ", as.integer(building_type_id))
+    leaflet.results(leafletProxy("map"), subdata, marker.popup, add=TRUE, col=cols[which.bin])
   })
   
 }# end server function

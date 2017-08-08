@@ -12,7 +12,8 @@ navbarPage(theme = shinytheme("simplex"),
                                            max = 2040,
                                            value = 2015,
                                            step = 5,
-                                           sep = "", animate = TRUE)
+                                           sep = "", 
+                                           animate = animationOptions(interval=3000))
                         ),
                         column(width = 9,
                                leafletOutput("map", height = "725px")
