@@ -7,13 +7,13 @@ library(leaflet)
 library(data.table)
 
 base.ind.dir <- "/media/modelsrv8d/opusgit/urbansim_data/data/psrc_parcel/runs"
-base.ind.dir <- "/Volumes/d$/opusgit/urbansim_data/data/psrc_parcel/runs"
+#base.ind.dir <- "/Volumes/d$/opusgit/urbansim_data/data/psrc_parcel/runs"
 #base.ind.dir <- "/Users/hana/d$/opusgit/urbansim_data/data/psrc_parcel/runs"
 #base.ind.dir <- "~/tmpind"
              
 
-#wrkdir <- '/home/shiny/apps/' # shiny path
-wrkdir <- '/Users/hana/R/shinyserver/'
+wrkdir <- '/home/shiny/apps/' # shiny path
+#wrkdir <- '/Users/hana/R/shinyserver/'
 #wrkdir <- '/Users/hana/psrc/R/shinyserver'
 # wrkdir <- 'C:/Users/CLam/Desktop/'
 
