@@ -1,0 +1,35 @@
+building_type_id,building_type_name,description,generic_building_type_description,generic_building_type_id,is_residential,unit_name
+1,agriculture,Agriculture,other,8,0,building_sqft
+2,civic,Civic and Quasi-Public,government,7,0,building_sqft
+3,commercial,Commercial,commercial,4,0,building_sqft
+4,condo_residential,Condo Residential,multi-family residential,2,1,building_sqft
+5,government,Government,government,7,0,building_sqft
+6,group_quarter,Group Quarters,other,8,0,building_sqft
+7,hospital,Hospital / Convalescent Center,government,7,0,building_sqft
+8,industrial,Industrial,industrial,5,0,building_sqft
+9,military,Military,government,7,0,building_sqft
+10,mixed_use,Mixed-Use,mixed-use,6,0,building_sqft
+11,mobile_home,Mobile Home,single family residential,1,1,building_sqft
+12,multi_family_residential,Multi-Family Residential,multi-family residential,2,1,building_sqft
+13,office,Office,office,3,0,building_sqft
+14,outbuilding,Outbuilding,other,8,0,building_sqft
+15,open_space,Park and Open Space,other,8,0,parcel_sqft
+16,parking,Parking,other,8,0,parcel_sqft
+17,recreation,Recreation,other,8,0,parcel_sqft
+18,school,School,government,7,0,building_sqft
+19,single_family_residential,Single Family Residential,single family residential,1,1,building_sqft
+20,tcu,Transportation Communication Utilities,industrial,5,0,building_sqft
+21,warehousing,Warehousing,industrial,5,0,building_sqft
+22,no_code,No Code,other,8,0,parcel_sqft
+23,basement,Basement,other,8,0,building_sqft
+24,fisheries,Fisheries,other,8,0,building_sqft
+25,forest - harvestable,Forest - Harvestable,other,8,0,parcel_sqft
+26,forest - protected,Forest - Protected,other,8,0,parcel_sqft
+27,mining,Mining,other,8,0,building_sqft
+28,no building use code,No Building Use Code,other,8,0,parcel_sqft
+29,other,Other,other,8,0,building_sqft
+30,right of way,Right-of-Way,other,8,0,parcel_sqft
+31,tribal,Tribal,other,8,0,building_sqft
+32,vacant,Vacant,other,8,0,parcel_sqft
+33,mixed use,Mixed Use,mixed-use,6,0,building_sqft
+34,mobile home park,Mobile Home Park,single family residential,1,1,building_sqft

@@ -2,6 +2,8 @@ function(input, output, session) {
 
   # functions ---------------------------------------------------------------
   
+  palette <- colorNumeric(c("black", "blue", "green", "yellow"), 1:26)
+  
   # reset/default map
   leaflet.blank <- function() {
     leaflet() %>%
@@ -87,34 +89,36 @@ function(input, output, session) {
 
   bldg.data <- reactive({
     dir <- file.path(base.ind.dir, input$run, "indicators")
-    files <- list.files(dir, "building__dataset_table__new_buildings__*", full.names = TRUE)
-    df <- NULL
-    for(f in files) {
-      if(length(grep("meta", f)) > 0) next
-      #df <- rbind(df, read.csv(f, sep="\t", header = TRUE))
-      df <- rbind(df, fread(f, sep="\t", header = TRUE))
-    }
-    if(!is.null(df)) {
-        #browser()
-      df %>% left_join(parcels.attr, by = "parcel_id")
-    }
+    file <- list.files(dir, "building__dataset_table__new_buildings__2040.tab", full.names = TRUE)
+    if(length(file) == 0) return(NULL)
+    df <- fread(file, sep="\t", header = TRUE)
+    df %>% left_join(parcels.attr, by = "parcel_id")
   })
   
   observe({
     data <- bldg.data()
     if (is.null(data)) return()
-    bins <- c(2014, seq(2015, 2040, by=5))
-    cols <- rainbow(length(bins))
-    which.bin <- cut(input$year, bins, labels=FALSE)+1
-    subdata <- subset(data, year_built > bins[which.bin-1] & year_built <= bins[which.bin])
+    years <- 2015:2040
+    subdata <- subset(data, year_built == input$year)
     if (is.null(subdata)) return()
+    subdata <- subdata %>% left_join(building_types, by="building_type_id")
     #browser()
-    marker.popup <- ~paste0("Parcel ID: ", as.character(parcel_id), 
+    marker.popup <- ~paste0("Parcel ID:  ", parcel_id, 
+                            "<br>Bld ID:     ", as.integer(building_id), 
                             "<br>Year built: ", as.integer(year_built),
-                            "<br>Bld type:   ", as.integer(building_type_id))
-    leaflet.results(leafletProxy("map"), subdata, marker.popup, add=TRUE, col=cols[which.bin])
+                            "<br>Bld type:   ", building_type_name,
+                            "<br>DU:         ", as.integer(residential_units.x),
+                            "<br>DU pcl base: ", as.integer(residential_units.y),
+                            "<br>Non-res sf: ", as.integer(non_residential_sqft),
+                            "<br>NR pcl base: ", as.integer(nonres_building_sqft),
+                            "<br>Unit price: ", round(unit_price, 2))
+    leaflet.results(leafletProxy("map"), subdata, marker.popup, add=isolate(input$cummulate), 
+                    col=palette(which(years == input$year)))
   })
   
+  observeEvent(input$clear, {
+    leafletProxy("map") %>% clearMarkers()
+  })
 }# end server function
 
 

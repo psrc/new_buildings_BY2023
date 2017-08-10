@@ -6,14 +6,22 @@ navbarPage(theme = shinytheme("simplex"),
                       fluidRow(
                         column(width = 3,
                                uiOutput("select_run"), # dynamic, lists runs on modelsrv8
+                               fluidRow(
+                                 column(width = 7,
+                                        checkboxInput("cummulate", "Cummulative", TRUE)),
+                                 column(width = 2,
+                                        actionButton("clear", "Clear")
+                                 )
+                               ),
                                sliderInput(inputId = "year",
                                            label = "Year",
-                                           min = 2015,
+                                           min = 2014,
                                            max = 2040,
-                                           value = 2015,
-                                           step = 5,
+                                           value = 2014,
+                                           step = 1,
                                            sep = "", 
                                            animate = animationOptions(interval=3000))
+
                         ),
                         column(width = 9,
                                leafletOutput("map", height = "725px")
