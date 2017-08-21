@@ -16,31 +16,24 @@ navbarPage(theme = shinytheme("simplex"),
                                            animate = animationOptions(interval=3000)),
                                hr(),
                                h5("Filters"),
-                               #fluidRow(
-                                 #column(width = 9,
-                                        #checkboxInput("cummulate", "Cummulative", TRUE)),
-                                        selectInput("timefilter", "Time", 
-                                                    c("Single year"="single", "Add by year"="cummulative", 
-                                                      "All <= year"="all"),
+                               selectInput("timefilter", "Time", 
+                                                    c("Single year"="single", 
+                                                      "All <= year"="all", "Add by year"="cummulative"),
                                                     selected = "single"),
-                                        selectInput("BTfilter", "Building Type", 
+                                selectInput("BTfilter", "Building Type", 
                                                     structure(building_types_selection[,1],
                                                               names=rownames(building_types_selection)),
                                                     multiple = TRUE, selected = building_types_selection[,1]),
                                hr(),
+                               h5("Style"),
                                selectInput("color", "Color By", 
                                            c("Year"="year", "Building type"="bt", 
                                              "Size residential"="sizeres", 
                                              "Size non-residential"="sizenonres"),
                                            selected = "year"),
-                               #),
-                                 #column(width = 2,
-                                        actionButton("clear", "Clear Map")
-                                 #)
-                               #),
- 
-                               
-
+                               checkboxInput("cluster", "Show in clusters", FALSE),
+                               actionButton("clear", "Clear Map"),
+                               hr()
                         ),
                         column(width = 9,
                                leafletOutput("map", height = "800px")

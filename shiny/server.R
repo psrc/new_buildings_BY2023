@@ -28,8 +28,10 @@ function(input, output, session) {
   }
   
   # show leaflet results
-  leaflet.results <- function(proxy, selected.data, popup, add=FALSE, col="black") {
-    if(!add) proxy <- proxy %>% clearMarkers()
+  leaflet.results <- function(proxy, selected.data, popup, add=FALSE, cluster = FALSE) {
+    if(!add) proxy <- proxy %>% clearMarkers() %>% clearMarkerClusters()
+    cluster.options <- NULL
+    if(cluster) cluster.options <- markerClusterOptions()
     proxy %>% 
       addCircleMarkers(data = selected.data,
                  ~long,
@@ -37,8 +39,8 @@ function(input, output, session) {
                  radius = 3,
                  popup = popup,
                 fillOpacity=0.4,
-                color=~color
-                #clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = TRUE)
+                color = ~color, 
+                clusterOptions = cluster.options
       ) 
   }  
   
@@ -97,12 +99,14 @@ function(input, output, session) {
                             "<br>Non-res sf: ", as.integer(non_residential_sqft),
                             "<br>NR pcl base: ", as.integer(nonres_building_sqft),
                             "<br>Unit price: ", round(unit_price, 2))
-    leaflet.results(leafletProxy("map"), data, marker.popup, add=input$timefilter == "cummulative")
+    leaflet.results(leafletProxy("map"), data, marker.popup, 
+                    add = input$timefilter == "cummulative" && !input$cluster,
+                    cluster = input$cluster)
   })
   
   # Clear map
   observeEvent(input$clear, {
-    leafletProxy("map") %>% clearMarkers()
+    leafletProxy("map") %>% clearMarkers() %>% clearMarkerClusters()
   })
 }# end server function
 
