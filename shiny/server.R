@@ -3,7 +3,10 @@ function(input, output, session) {
   # functions ---------------------------------------------------------------
   
   # Color palette
-  palette <- colorNumeric(c("black", "blue", "green", "yellow"), 1:26)
+  palette.year <- colorNumeric(c("black", "blue", "green", "yellow"), 2015:2040)
+  palette.bt <- colorFactor(rainbow(nrow(building_types_selection)), 
+                              levels=building_types_selection[,1])
+
   
   # reset/default map
   leaflet.blank <- function() {
@@ -34,7 +37,7 @@ function(input, output, session) {
                  radius = 3,
                  popup = popup,
                 fillOpacity=0.4,
-                color=col
+                color=~color
                 #clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = TRUE)
       ) 
   }  
@@ -62,14 +65,29 @@ function(input, output, session) {
     df %>% left_join(parcels.attr, by = "parcel_id") %>% left_join(building_types, by="building_type_id")
   })
   
-  # display markers
-  observe({
+  subset.data <- reactive({
     data <- bldg.data()
     if (is.null(data)) return()
-    years <- 2015:2040
-    subdata <- subset(data, year_built == input$year)
+    subdata <- if(input$timefilter == "all") subset(data, year_built <= as.integer(input$year)) else 
+                  subset(data, year_built == input$year)
+    subdata <- subset(subdata, building_type_id %in% as.integer(input$BTfilter))
     if (is.null(subdata)) return()
-    #browser()
+    
+    if(input$color %in% c("sizeres", "sizenonres")) {
+      palette.size <- colorQuantile("YlOrRd", range(data[[color.attributes[input$color]]]), n=9)
+      palette.name <- "palette.size"
+    } else palette.name <- paste0("palette.", input$color)
+    subdata$color <-rep(NA, nrow(subdata))
+    if(nrow(subdata) > 0) subdata$color[] <- do.call(palette.name, list(subdata[[color.attributes[input$color]]]))
+    subdata
+  })
+  
+  subset.data.deb <- subset.data %>% debounce(1000) # causes some delay for collecting inputs
+  
+  # display markers
+  observe({
+    data <- subset.data.deb()
+    if (is.null(data)) return()
     marker.popup <- ~paste0("Parcel ID:  ", parcel_id, 
                             "<br>Bld ID:     ", as.integer(building_id), 
                             "<br>Year built: ", as.integer(year_built),
@@ -79,8 +97,7 @@ function(input, output, session) {
                             "<br>Non-res sf: ", as.integer(non_residential_sqft),
                             "<br>NR pcl base: ", as.integer(nonres_building_sqft),
                             "<br>Unit price: ", round(unit_price, 2))
-    leaflet.results(leafletProxy("map"), subdata, marker.popup, add=isolate(input$cummulate), 
-                    col=palette(which(years == input$year)))
+    leaflet.results(leafletProxy("map"), data, marker.popup, add=input$timefilter == "cummulative")
   })
   
   # Clear map
