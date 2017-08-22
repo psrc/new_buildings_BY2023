@@ -7,6 +7,10 @@ function(input, output, session) {
   palette.bt <- colorFactor(rainbow(nrow(building_types_selection)), 
                               levels=building_types_selection[,1])
 
+  # enable/disable color selection depending on clustering
+  observeEvent(input$cluster, {
+    shinyjs::toggleState("color", input$cluster == FALSE)
+  })
   
   # reset/default map
   leaflet.blank <- function() {

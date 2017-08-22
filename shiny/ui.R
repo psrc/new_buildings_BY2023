@@ -3,6 +3,7 @@ navbarPage(theme = shinytheme("simplex"),
            tabPanel("View by Time",
                     tags$head(tags$script(src="gomap.js")),
                     fluidPage(
+                      shinyjs::useShinyjs(),
                       fluidRow(
                         column(width = 3,
                                uiOutput("select_run"), # dynamic, lists runs on modelsrv8
