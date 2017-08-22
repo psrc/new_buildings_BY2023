@@ -85,7 +85,7 @@ function(input, output, session) {
       palette.name <- "palette.size"
     } else {
       palette.name <- paste0("palette.", input$color)
-      values <- data[[color.attributes[input$color]]]
+      values <- subdata[[color.attributes[input$color]]]
     }
     subdata$color <-rep(NA, nrow(subdata))
     if(nrow(subdata) > 0) subdata$color[] <- do.call(palette.name, list(values))
