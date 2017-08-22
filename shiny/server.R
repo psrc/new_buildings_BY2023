@@ -80,7 +80,7 @@ function(input, output, session) {
     if (is.null(subdata)) return()
     
     if(input$color %in% c("sizeres", "sizenonres")) {
-      values <- log(data[[color.attributes[input$color]]]+1)
+      values <- log(subdata[[color.attributes[input$color]]]+1)
       palette.size <- colorQuantile("YlOrRd", range(values), n=9)
       palette.name <- "palette.size"
     } else {
