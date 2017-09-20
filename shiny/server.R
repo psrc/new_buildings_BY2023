@@ -7,6 +7,10 @@ function(input, output, session) {
   palette.bt <- colorFactor(rainbow(nrow(building_types_selection)), 
                               levels=building_types_selection[,1])
 
+  # enable/disable color selection depending on clustering
+  observeEvent(input$cluster, {
+    shinyjs::toggleState("color", input$cluster == FALSE)
+  })
   
   # reset/default map
   leaflet.blank <- function() {
@@ -28,8 +32,10 @@ function(input, output, session) {
   }
   
   # show leaflet results
-  leaflet.results <- function(proxy, selected.data, popup, add=FALSE, col="black") {
-    if(!add) proxy <- proxy %>% clearMarkers()
+  leaflet.results <- function(proxy, selected.data, popup, add=FALSE, cluster = FALSE) {
+    if(!add) proxy <- proxy %>% clearMarkers() %>% clearMarkerClusters()
+    cluster.options <- NULL
+    if(cluster) cluster.options <- markerClusterOptions()
     proxy %>% 
       addCircleMarkers(data = selected.data,
                  ~long,
@@ -37,8 +43,8 @@ function(input, output, session) {
                  radius = 3,
                  popup = popup,
                 fillOpacity=0.4,
-                color=~color
-                #clusterOptions = markerClusterOptions(removeOutsideVisibleBounds = TRUE)
+                color = ~color, 
+                clusterOptions = cluster.options
       ) 
   }  
   
@@ -77,11 +83,15 @@ function(input, output, session) {
     if (is.null(subdata)) return()
     
     if(input$color %in% c("sizeres", "sizenonres")) {
-      palette.size <- colorQuantile("YlOrRd", range(data[[color.attributes[input$color]]]), n=9)
+      values <- log(subdata[[color.attributes[input$color]]]+1)
+      palette.size <- colorQuantile("YlOrRd", range(values), n=9)
       palette.name <- "palette.size"
-    } else palette.name <- paste0("palette.", input$color)
+    } else {
+      palette.name <- paste0("palette.", input$color)
+      values <- subdata[[color.attributes[input$color]]]
+    }
     subdata$color <-rep(NA, nrow(subdata))
-    if(nrow(subdata) > 0) subdata$color[] <- do.call(palette.name, list(subdata[[color.attributes[input$color]]]))
+    if(nrow(subdata) > 0) subdata$color[] <- do.call(palette.name, list(values))
     subdata
   })
   
@@ -100,12 +110,14 @@ function(input, output, session) {
                             "<br>Non-res sf: ", as.integer(non_residential_sqft),
                             "<br>NR pcl base: ", as.integer(nonres_building_sqft),
                             "<br>Unit price: ", round(unit_price, 2))
-    leaflet.results(leafletProxy("map"), data, marker.popup, add=input$timefilter == "cummulative")
+    leaflet.results(leafletProxy("map"), data, marker.popup, 
+                    add = input$timefilter == "cummulative" && !input$cluster,
+                    cluster = input$cluster)
   })
   
   # Clear map
   observeEvent(input$clear, {
-    leafletProxy("map") %>% clearMarkers()
+    leafletProxy("map") %>% clearMarkers() %>% clearMarkerClusters()
   })
   
   ####
