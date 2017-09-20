@@ -47,5 +47,18 @@ navbarPage(theme = shinytheme("simplex"),
                         ) # end column
                       ) # end fluidRow
                     ) # end fluidPage
+           ), # end tabPanel
+           tabPanel("View Mix-Use",
+                fluidPage(
+                    fluidRow(
+                        column(width = 3,
+                            uiOutput("select_run_mixuse"),
+                            "Dots show new development in mix-use parcels. They are color-scaled by the percentage of non-residential share, with blue being 100% non-residential and red being 100% residential."
+                        ), # end column
+                        column(width = 9,
+                               leafletOutput("map_mixuse", height = "800px")
+                        ) # end column
+                    ) # end fluidRow
+                ) # end fluidPage
            ) # end tabPanel
 ) # end navbarPage

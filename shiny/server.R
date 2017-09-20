@@ -62,15 +62,18 @@ function(input, output, session) {
     file <- list.files(dir, "building__dataset_table__new_buildings__2040.tab", full.names = TRUE)
     if(length(file) == 0) return(NULL)
     df <- fread(file, sep="\t", header = TRUE)
-    df %>% left_join(parcels.attr, by = "parcel_id") %>% left_join(building_types, by="building_type_id")
+    setkey(df, parcel_id)
+    df <- df %>% merge(parcels, all.x=TRUE) 
+    setkey(df, building_type_id)
+    df %>% merge(building_types, all.x=TRUE)
   })
   
   subset.data <- reactive({
     data <- bldg.data()
     if (is.null(data)) return()
-    subdata <- if(input$timefilter == "all") subset(data, year_built <= as.integer(input$year)) else 
-                  subset(data, year_built == input$year)
-    subdata <- subset(subdata, building_type_id %in% as.integer(input$BTfilter))
+    subdata <- if(input$timefilter == "all") data[year_built <= as.integer(input$year)] else 
+                  data[year_built == input$year]
+    subdata <- subdata[building_type_id %in% as.integer(input$BTfilter)]
     if (is.null(subdata)) return()
     
     if(input$color %in% c("sizeres", "sizenonres")) {
@@ -103,6 +106,62 @@ function(input, output, session) {
   # Clear map
   observeEvent(input$clear, {
     leafletProxy("map") %>% clearMarkers()
+  })
+  
+  ####
+  # Code for the mix-use tab
+  # select which run to use
+  output$select_run_mixuse <- renderUI({
+      select.run <- list.dirs(base.ind.dir, full.names = FALSE, recursive = FALSE)
+      selectInput(inputId = "run_mu",
+                  label = "Run",
+                  choices = select.run,
+                  width = "100%")
+  })
+  
+  # display initial map
+  output$map_mixuse <- renderLeaflet({
+      leaflet.blank()
+  })
+  
+  # read buildings indicator data and aggregate to parcels
+  pcl.data <- reactive({
+      dir <- file.path(base.ind.dir, input$run_mu, "indicators")
+      file <- list.files(dir, "building__dataset_table__new_buildings__2040.tab", full.names = TRUE)
+      if(length(file) == 0) return(NULL)
+      df <- fread(file, sep="\t", header = TRUE)
+      setkey(df, parcel_id)
+      if(is.null(df$building_sqft)) df[, building_sqft:=NA]
+      pclbld <- df[, .(new_res_units=sum(residential_units),
+                       new_nonres_sqft=sum(non_residential_sqft),
+                       new_price=median(unit_price),
+                       new_building_sqft=sum(building_sqft)), 
+                   by = parcel_id]
+      pcl <- merge(parcels, pclbld)
+      mixpcl <- pcl[N_res_con > 1 & N_nonres_con > 1]
+      mixpcl[is.na(new_res_units), new_res_units:=0]
+      mixpcl[is.na(new_nonres_sqft), new_nonres_sqft:=0]
+      mixpcl[, nonres_share:= new_nonres_sqft/new_building_sqft]
+      mixpcl[new_nonres_sqft > 0 | new_res_units > 0]
+  })
+  
+  # display markers
+  observe({
+      data <- pcl.data()
+      if (is.null(data)) return()
+      palette.share <- colorQuantile("Spectral", c(0,1), n=9)
+      data[, color := NA]
+      if(nrow(data) > 0) 
+          data$color[] <- do.call("palette.share", list(data[, nonres_share]))
+      marker.popup <- ~paste0("Parcel ID:  ", parcel_id, 
+                              "<br>Non-res percent: ", as.integer(100*nonres_share),
+                              "<br>DU:            ", as.integer(new_res_units),
+                              "<br>Residen sqft:  ", as.integer(new_building_sqft-new_nonres_sqft),
+                              "<br>Maximum DU/A:  ", round(max_dua,2),
+                              "<br>Non-res sqft:  ", as.integer(new_nonres_sqft),
+                              "<br>Maximum FAR:   ", round(max_far,2),
+                              "<br>Unit price:    ", round(new_price, 2))
+      leaflet.results(leafletProxy("map_mixuse"), data, marker.popup, add=FALSE)
   })
 }# end server function
 
