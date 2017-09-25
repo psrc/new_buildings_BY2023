@@ -47,7 +47,16 @@ navbarPage(theme = shinytheme("simplex"),
                     fluidRow(
                         column(width = 3,
                             uiOutput("select_run_mixuse"),
-                            "Dots show new development in mix-use parcels. They are color-scaled by the percentage of non-residential share, with blue being 100% non-residential and red being 100% residential."
+                            selectInput("MUindicator", "Indicator", 
+                                        c("Non-residential Share"="share",
+                                          "Maximum DU/Acre"="dua",
+                                          "Maximum FAR"="far",
+                                          "Residential sqft"="ressqft",
+                                          "Non-residential sqft"="nonressqft",
+                                          "Median Price"="price"
+                                        ),
+                                        selected = "share"),
+                            "Dots show new development in mix-use parcels. They are color-scaled by the chosen indicator, with blue being the smallest value and red being the largest value."
                         ), # end column
                         column(width = 9,
                                leafletOutput("map_mixuse", height = "800px")

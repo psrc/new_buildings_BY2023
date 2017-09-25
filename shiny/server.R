@@ -140,7 +140,7 @@ function(input, output, session) {
   pcl.data <- reactive({
       dir <- file.path(base.ind.dir, input$run_mu, "indicators")
       file <- list.files(dir, "building__dataset_table__new_buildings__2040.tab", full.names = TRUE)
-      if(length(file) == 0) return(NULL)
+      if(length(file) == 0) return(data.table(a=integer()))
       df <- fread(file, sep="\t", header = TRUE)
       setkey(df, parcel_id)
       if(is.null(df$building_sqft)) df[, building_sqft:=NA]
@@ -154,27 +154,53 @@ function(input, output, session) {
       mixpcl[is.na(new_res_units), new_res_units:=0]
       mixpcl[is.na(new_nonres_sqft), new_nonres_sqft:=0]
       mixpcl[, nonres_share:= new_nonres_sqft/new_building_sqft]
+      mixpcl[, new_res_sqft := new_building_sqft-new_nonres_sqft]
       mixpcl[new_nonres_sqft > 0 | new_res_units > 0]
   })
   
+  mu.indicator <- reactive({
+      switch(input$MUindicator,
+             share="nonres_share",
+             dua="max_dua",
+             far="max_far",
+             ressqft="new_res_sqft",
+             nonressqft="new_nonres_sqft",
+             price="new_price"
+             )
+  })
   # display markers
   observe({
       data <- pcl.data()
       if (is.null(data)) return()
-      palette.share <- colorQuantile("Spectral", c(0,1), n=9)
+      if(nrow(data) == 0) {
+          clear.mixuse()
+          return()
+      }
       data[, color := NA]
-      if(nrow(data) > 0) 
-          data$color[] <- do.call("palette.share", list(data[, nonres_share]))
+      ind <- mu.indicator()
+      d <- data[[ind]]
+      if(ind %in% c("new_nonres_sqft", "new_res_sqft", "new_price"))
+              d <- log(d+1)
+      palette.share <- colorQuantile("Spectral", range(d), n=9, reverse=TRUE)
+      data$color[] <- do.call("palette.share", list(d))
+     
       marker.popup <- ~paste0("Parcel ID:  ", parcel_id, 
                               "<br>Non-res percent: ", as.integer(100*nonres_share),
                               "<br>DU:            ", as.integer(new_res_units),
-                              "<br>Residen sqft:  ", as.integer(new_building_sqft-new_nonres_sqft),
+                              "<br>Residen sqft:  ", as.integer(new_res_sqft),
                               "<br>Maximum DU/A:  ", round(max_dua,2),
                               "<br>Non-res sqft:  ", as.integer(new_nonres_sqft),
                               "<br>Maximum FAR:   ", round(max_far,2),
-                              "<br>Unit price:    ", round(new_price, 2))
+                              "<br>Unit price:    ", round(new_price, 2),
+                              "<br>DU base:       ", as.integer(residential_units),
+                              "<br>NonRes sf base:", as.integer(nonres_building_sqft)
+                              )
       leaflet.results(leafletProxy("map_mixuse"), data, marker.popup, add=FALSE)
   })
+  # Clear map
+  clear.mixuse <- function()
+      leafletProxy("map_mixuse") %>% clearMarkers()
+  
 }# end server function
 
 
