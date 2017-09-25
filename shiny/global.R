@@ -54,18 +54,23 @@ setkey(constr, plan_type_id)
 # Create tables of residential and non-res constraints that 
 # count the number of constraints and get their minimum and maximum
 resconstr <- constr[constraint_type == "units_per_acre", 
-                    .(N_res_con=.N, max_dua = max(maximum), min_dua=min(minimum)),
+                    .(N_res_con=.N, max_dua = max(maximum), min_dua=min(minimum),
+                      allow_mfr=any(generic_land_use_type_id == 2)),
                     by= plan_type_id]
 
 nonresconstr <- constr[constraint_type == "far", 
-                       .(N_nonres_con=.N, max_far = max(maximum), min_far=min(minimum)),
+                       .(N_nonres_con=.N, max_far = max(maximum), min_far=min(minimum),
+                         allow_off=any(generic_land_use_type_id == 3),
+                         allow_com=any(generic_land_use_type_id == 4)),
                        by= plan_type_id]
 
-# Outer join of the two tables by pan_type_id
+# Outer join of the two tables by plan_type_id
 plantypes <- merge(resconstr, nonresconstr, all = TRUE)
 # replace NAs with 0s
 plantypes[is.na(N_res_con), N_res_con:=0]
 plantypes[is.na(N_nonres_con), N_nonres_con:=0]
+# select only mix-use plan types
+plantypes <- plantypes[N_res_con > 0 & N_nonres_con > 0]
 
 # Merge plan types with parcels table
 setkey(parcels, plan_type_id)

@@ -150,12 +150,12 @@ function(input, output, session) {
                        new_building_sqft=sum(building_sqft)), 
                    by = parcel_id]
       pcl <- merge(parcels, pclbld)
-      mixpcl <- pcl[N_res_con > 1 & N_nonres_con > 1]
-      mixpcl[is.na(new_res_units), new_res_units:=0]
-      mixpcl[is.na(new_nonres_sqft), new_nonres_sqft:=0]
-      mixpcl[, nonres_share:= new_nonres_sqft/new_building_sqft]
-      mixpcl[, new_res_sqft := new_building_sqft-new_nonres_sqft]
-      mixpcl[new_nonres_sqft > 0 | new_res_units > 0]
+      pcl <- pcl[!is.na(N_res_con) & !is.na(N_nonres_con)]
+      pcl[is.na(new_res_units), new_res_units:=0]
+      pcl[is.na(new_nonres_sqft), new_nonres_sqft:=0]
+      pcl[, nonres_share:= new_nonres_sqft/new_building_sqft]
+      pcl[, new_res_sqft := new_building_sqft-new_nonres_sqft]
+      pcl[new_nonres_sqft > 0 | new_res_units > 0]
   })
   
   mu.indicator <- reactive({
