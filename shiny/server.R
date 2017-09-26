@@ -159,16 +159,20 @@ function(input, output, session) {
       pcl[new_nonres_sqft > 0 | new_res_units > 0]
   })
   
-  mu.indicator <- reactive({
-      switch(input$MUindicator,
+  get.mu.indicator <- function(ind)
+      switch(ind,
              share="nonres_share",
              dua="max_dua",
              far="max_far",
              ressqft="new_res_sqft",
              nonressqft="new_nonres_sqft",
              price="new_price"
-             )
+      )
+
+  mu.indicator <- reactive({
+      get.mu.indicator(input$MUindicator)
   })
+  
   # display markers
   observe({
       data <- pcl.data()
@@ -205,6 +209,33 @@ function(input, output, session) {
   clear.mixuse <- function()
       leafletProxy("map_mixuse") %>% clearMarkers()
   
+  # Scatter plot
+  output$MUplot <- renderPlot({
+      data <- pcl.data()
+      if (is.null(data)) return()
+      if(nrow(data) == 0) return(plot(0,type='n',axes=FALSE,ann=FALSE))
+      if(input$office) data <- data[allow_off == TRUE]
+      if(input$mfr) data <- data[allow_mfr == TRUE]
+      if(input$comm) data <- data[allow_com == TRUE]
+      xind <- get.mu.indicator(input$MUindicatorX)
+      yind <- get.mu.indicator(input$MUindicatorY)
+      xlim <- ylim <- NULL
+      if(xind == "nonres_share") xlim <- c(-0.1, 1.1)
+      if(yind == "nonres_share") ylim <- c(-0.1, 1.1)
+      plot(data[[xind]], data[[yind]], xlab=input$MUindicatorX, 
+           ylab=input$MUindicatorY, xlim=xlim, ylim=ylim)
+      if("nonres_share" %in% c(xind, yind)) {
+          bpind <- c(xind, yind)[c(xind, yind) != "nonres_share"]
+          if(length(bpind)>0) {
+            boxplot(data[nonres_share == 0, bpind, with=FALSE], 
+                  horizontal=yind == "nonres_share", boxwex = 0.25, add=TRUE, 
+                  at=0, xaxt="n", yaxt="n", outline=FALSE)
+            boxplot(data[nonres_share == 1, bpind, with=FALSE], 
+                  horizontal=yind == "nonres_share", boxwex = 0.25, add=TRUE, 
+                  at=1, xaxt="n", yaxt="n", outline=FALSE)
+          }
+      }
+  })
 }# end server function
 
 

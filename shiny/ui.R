@@ -1,3 +1,11 @@
+mu.select.indicators <- c("Non-residential Share"="share",
+                          "Maximum DU/Acre"="dua",
+                          "Maximum FAR"="far",
+                          "Residential sqft"="ressqft",
+                          "Non-residential sqft"="nonressqft",
+                          "Unit price"="price"
+                            )
+
 navbarPage(theme = shinytheme("simplex"),
            "Development Projects",
            tabPanel("View by Time",
@@ -48,13 +56,7 @@ navbarPage(theme = shinytheme("simplex"),
                         column(width = 3,
                             uiOutput("select_run_mixuse"),
                             selectInput("MUindicator", "Indicator", 
-                                        c("Non-residential Share"="share",
-                                          "Maximum DU/Acre"="dua",
-                                          "Maximum FAR"="far",
-                                          "Residential sqft"="ressqft",
-                                          "Non-residential sqft"="nonressqft",
-                                          "Unit price"="price"
-                                        ),
+                                        mu.select.indicators,
                                         selected = "share"),
                             "Exclude where not allowed:",
                             checkboxInput("office", "Office"),
@@ -63,7 +65,24 @@ navbarPage(theme = shinytheme("simplex"),
                             "Dots show new development in mix-use parcels. They are color-scaled by the chosen indicator, with blue being the smallest value and red being the largest value."
                         ), # end column
                         column(width = 9,
+                          tabsetPanel(
+                            tabPanel("Map",
                                leafletOutput("map_mixuse", height = "800px")
+                               ),
+                            tabPanel("Plots",
+                                column(width = 6,
+                                selectInput("MUindicatorX", "X axis", 
+                                            mu.select.indicators,
+                                            selected = "far")
+                                ),
+                                column(width = 6,
+                                selectInput("MUindicatorY", "Y axis", 
+                                            mu.select.indicators,
+                                            selected = "share")
+                                ),
+                                plotOutput("MUplot")
+                                #)
+                            ))
                         ) # end column
                     ) # end fluidRow
                 ) # end fluidPage
