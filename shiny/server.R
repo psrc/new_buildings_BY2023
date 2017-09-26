@@ -81,7 +81,7 @@ function(input, output, session) {
                   data[year_built == input$year]
     subdata <- subdata[building_type_id %in% as.integer(input$BTfilter)]
     if (is.null(subdata)) return()
-    
+    if(is.null(subdata[["template_id"]])) subdata[,template_id:=NA]
     if(input$color %in% c("sizeres", "sizenonres")) {
       values <- log(subdata[[color.attributes[input$color]]]+1)
       palette.size <- colorQuantile("YlOrRd", range(values), n=9)
@@ -90,8 +90,8 @@ function(input, output, session) {
       palette.name <- paste0("palette.", input$color)
       values <- subdata[[color.attributes[input$color]]]
     }
-    subdata$color <-rep(NA, nrow(subdata))
-    if(nrow(subdata) > 0) subdata$color[] <- do.call(palette.name, list(values))
+    subdata[, color := NA]
+    if(nrow(subdata) > 0) subdata[, color:= do.call(palette.name, list(values))]
     subdata
   })
   
@@ -109,7 +109,8 @@ function(input, output, session) {
                             "<br>DU pcl base: ", as.integer(residential_units.y),
                             "<br>Non-res sf: ", as.integer(non_residential_sqft),
                             "<br>NR pcl base: ", as.integer(nonres_building_sqft),
-                            "<br>Unit price: ", round(unit_price, 2))
+                            "<br>Unit price: ", round(unit_price, 2),
+                            "<br>Template ID: ", as.integer(template_id))
     leaflet.results(leafletProxy("map"), data, marker.popup, 
                     add = input$timefilter == "cummulative" && !input$cluster,
                     cluster = input$cluster)
@@ -176,6 +177,9 @@ function(input, output, session) {
           clear.mixuse()
           return()
       }
+      if(input$office) data <- data[allow_off == TRUE]
+      if(input$mfr) data <- data[allow_mfr == TRUE]
+      if(input$comm) data <- data[allow_com == TRUE]
       data[, color := NA]
       ind <- mu.indicator()
       d <- data[[ind]]

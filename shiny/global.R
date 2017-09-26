@@ -69,6 +69,10 @@ plantypes <- merge(resconstr, nonresconstr, all = TRUE)
 # replace NAs with 0s
 plantypes[is.na(N_res_con), N_res_con:=0]
 plantypes[is.na(N_nonres_con), N_nonres_con:=0]
+plantypes[is.na(allow_mfr), allow_mfr:=FALSE]
+plantypes[is.na(allow_off), allow_off:=FALSE]
+plantypes[is.na(allow_com), allow_com:=FALSE]
+
 # select only mix-use plan types
 plantypes <- plantypes[N_res_con > 0 & N_nonres_con > 0]
 

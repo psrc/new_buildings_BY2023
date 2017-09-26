@@ -53,9 +53,13 @@ navbarPage(theme = shinytheme("simplex"),
                                           "Maximum FAR"="far",
                                           "Residential sqft"="ressqft",
                                           "Non-residential sqft"="nonressqft",
-                                          "Median Price"="price"
+                                          "Unit price"="price"
                                         ),
                                         selected = "share"),
+                            "Exclude where not allowed:",
+                            checkboxInput("office", "Office"),
+                            checkboxInput("comm", "Commercial"),
+                            checkboxInput("mfr", "Multi-family"),
                             "Dots show new development in mix-use parcels. They are color-scaled by the chosen indicator, with blue being the smallest value and red being the largest value."
                         ), # end column
                         column(width = 9,
