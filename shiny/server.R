@@ -80,6 +80,8 @@ function(input, output, session) {
     subdata <- if(input$timefilter == "all") data[year_built <= as.integer(input$year)] else 
                   data[year_built == input$year]
     subdata <- subdata[building_type_id %in% as.integer(input$BTfilter)]
+    if(input$mixuse.chb)
+        subdata <- subdata[!is.na(N_res_con) & !is.na(N_nonres_con)]
     if (is.null(subdata)) return()
     if(is.null(subdata[["template_id"]])) subdata[,template_id:=NA]
     if(input$color %in% c("sizeres", "sizenonres")) {
