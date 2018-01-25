@@ -6,16 +6,32 @@ library(tidyverse)
 #library(DT)
 library(data.table)
 
-base.ind.dir <- "/media/modelsrv8d/opusgit/urbansim_data/data/psrc_parcel/runs"
+base.ind.dir <- list(Modelsrv6 = "/media/modelsrv6d/opusgit/urbansim_data/data/psrc_parcel/runs",
+                     Modelsrv8 = "/media/modelsrv8d/opusgit/urbansim_data/data/psrc_parcel/runs",
+                     Modelsrv3 = "/media/modelsrv3e/opusgit/urbansim_data/data/psrc_parcel/runs"
+)
+# base.ind.dir <- list(Modelsrv6 = "//modelsrv6/d$/opusgit/urbansim_data/data/psrc_parcel/runs",
+#                      Modelsrv8 = "//MODELSRV8/d$/opusgit/urbansim_data/data/psrc_parcel/runs",
+#                      Modelsrv3 = "//modelsrv3/e$/opusgit/urbansim_data/data/psrc_parcel/runs"
+#              )
 #base.ind.dir <- "/Volumes/d$/opusgit/urbansim_data/data/psrc_parcel/runs"
 #base.ind.dir <- "/Users/hana/d$/opusgit/urbansim_data/data/psrc_parcel/runs"
 #base.ind.dir <- "~/tmpind"
-             
 
 wrkdir <- '/home/shiny/apps/' # shiny path
 #wrkdir <- '/Users/hana/R/shinyserver/'
 #wrkdir <- '/Users/hana/psrc/R/shinyserver'
 # wrkdir <- 'C:/Users/CLam/Desktop/'
+
+# scan for all directories in servers
+allruns <- list()
+for (b in 1:length(base.ind.dir)) {
+  fdirlist <- list.dirs(base.ind.dir[[b]], full.names = TRUE, recursive = FALSE)
+  ndirlist <- list.dirs(base.ind.dir[[b]], full.names = FALSE, recursive = FALSE)
+  dirlist <- setNames(fdirlist, ndirlist)
+  allruns[[length(allruns)+1]] <- dirlist
+}
+names(allruns) <- names(base.ind.dir) %>% toupper
 
 data <- 'parcel-viewer/data'
 bld.data <- "new_buildings/data"

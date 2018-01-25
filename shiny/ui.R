@@ -14,7 +14,7 @@ navbarPage(theme = shinytheme("simplex"),
                       shinyjs::useShinyjs(),
                       fluidRow(
                         column(width = 3,
-                               uiOutput("select_run"), # dynamic, lists runs on modelsrv8
+                               uiOutput("select_run"), # dynamic, lists runs on available servers
                                sliderInput(inputId = "year",
                                            label = "Year",
                                            min = 2014,

@@ -55,16 +55,15 @@ function(input, output, session) {
 
   # select which run to use
   output$select_run <- renderUI({
-    select.run <- list.dirs(base.ind.dir, full.names = FALSE, recursive = FALSE)
     selectInput(inputId = "run",
                 label = "Run",
-                choices = select.run,
+                choices = allruns,
                 width = "100%")
   })
 
   # read buildings indicator data 
   bldg.data <- reactive({
-    dir <- file.path(base.ind.dir, input$run, "indicators")
+    dir <- file.path(input$run, "indicators")
     file <- list.files(dir, "building__dataset_table__new_buildings__2040.tab", full.names = TRUE)
     if(length(file) == 0) return(NULL)
     df <- fread(file, sep="\t", header = TRUE)
@@ -127,10 +126,9 @@ function(input, output, session) {
   # Code for the mix-use tab
   # select which run to use
   output$select_run_mixuse <- renderUI({
-      select.run <- list.dirs(base.ind.dir, full.names = FALSE, recursive = FALSE)
       selectInput(inputId = "run_mu",
                   label = "Run",
-                  choices = select.run,
+                  choices = allruns,
                   width = "100%")
   })
   
@@ -141,7 +139,7 @@ function(input, output, session) {
   
   # read buildings indicator data and aggregate to parcels
   pcl.data <- reactive({
-      dir <- file.path(base.ind.dir, input$run_mu, "indicators")
+      dir <- file.path(input$run_mu, "indicators")
       file <- list.files(dir, "building__dataset_table__new_buildings__2040.tab", full.names = TRUE)
       if(length(file) == 0) return(data.table(a=integer()))
       df <- fread(file, sep="\t", header = TRUE)
