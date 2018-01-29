@@ -33,6 +33,10 @@ for (b in 1:length(base.ind.dir)) {
 }
 names(allruns) <- names(base.ind.dir) %>% toupper
 
+bld.years <- c(2040, 2050)
+bld.filename <- paste0("building__dataset_table__new_buildings__", bld.years, ".tab") %>%
+  paste(sep = "", collapse = "|")
+
 data <- 'parcel-viewer/data'
 bld.data <- "new_buildings/data"
 
@@ -98,3 +102,5 @@ setkey(plantypes, plan_type_id)
 
 parcels <- merge(parcels, plantypes, all.x = TRUE)
 setkey(parcels, parcel_id)
+
+

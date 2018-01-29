@@ -3,7 +3,7 @@ function(input, output, session) {
   # functions ---------------------------------------------------------------
   
   # Color palette
-  palette.year <- colorNumeric(c("black", "blue", "green", "yellow"), 2015:2040)
+  palette.year <- colorNumeric(c("black", "blue", "green", "yellow"), 2015:2050)
   palette.bt <- colorFactor(rainbow(nrow(building_types_selection)), 
                               levels=building_types_selection[,1])
 
@@ -64,9 +64,10 @@ function(input, output, session) {
   # read buildings indicator data 
   bldg.data <- reactive({
     dir <- file.path(input$run, "indicators")
-    file <- list.files(dir, "building__dataset_table__new_buildings__2040.tab", full.names = TRUE)
+    file <- list.files(dir, bld.filename, full.names = TRUE)
     if(length(file) == 0) return(NULL)
     df <- fread(file, sep="\t", header = TRUE)
+    # browser()
     setkey(df, parcel_id)
     df <- df %>% merge(parcels, all.x=TRUE) 
     setkey(df, building_type_id)
@@ -140,7 +141,7 @@ function(input, output, session) {
   # read buildings indicator data and aggregate to parcels
   pcl.data <- reactive({
       dir <- file.path(input$run_mu, "indicators")
-      file <- list.files(dir, "building__dataset_table__new_buildings__2040.tab", full.names = TRUE)
+      file <- list.files(dir, bld.filename, full.names = TRUE)
       if(length(file) == 0) return(data.table(a=integer()))
       df <- fread(file, sep="\t", header = TRUE)
       setkey(df, parcel_id)
