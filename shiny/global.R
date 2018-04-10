@@ -5,25 +5,29 @@ library(dplyr)
 library(tidyverse)
 #library(DT)
 library(data.table)
+library(leaflet.extras)
+library(geoshaper)
+library(sp)
+library(DT)
 
-base.ind.dir <- list(Modelsrv5 = "/media/modelsrv5d/opusgit/urbansim_data/data/psrc_parcel/runs",
-                     Modelsrv6 = "/media/modelsrv6d/opusgit/urbansim_data/data/psrc_parcel/runs",
-                     Modelsrv8 = "/media/modelsrv8d/opusgit/urbansim_data/data/psrc_parcel/runs",
-                     Modelsrv3 = "/media/modelsrv3e/opusgit/urbansim_data/data/psrc_parcel/runs"
-)
-# base.ind.dir <- list(Modelsrv5 = "//modelsrv5/d$/opusgit/urbansim_data/data/psrc_parcel/runs",
-#                      Modelsrv6 = "//modelsrv6/d$/opusgit/urbansim_data/data/psrc_parcel/runs",
-#                      Modelsrv8 = "//MODELSRV8/d$/opusgit/urbansim_data/data/psrc_parcel/runs",
-#                      Modelsrv3 = "//modelsrv3/e$/opusgit/urbansim_data/data/psrc_parcel/runs"
-#              )
+# base.ind.dir <- list(Modelsrv5 = "/media/modelsrv5d/opusgit/urbansim_data/data/psrc_parcel/runs",
+#                      Modelsrv6 = "/media/modelsrv6d/opusgit/urbansim_data/data/psrc_parcel/runs",
+#                      Modelsrv8 = "/media/modelsrv8d/opusgit/urbansim_data/data/psrc_parcel/runs",
+#                      Modelsrv3 = "/media/modelsrv3e/opusgit/urbansim_data/data/psrc_parcel/runs"
+# )
+base.ind.dir <- list(Modelsrv5 = "//modelsrv5/d$/opusgit/urbansim_data/data/psrc_parcel/runs",
+                     Modelsrv6 = "//modelsrv6/d$/opusgit/urbansim_data/data/psrc_parcel/runs",
+                     Modelsrv8 = "//MODELSRV8/d$/opusgit/urbansim_data/data/psrc_parcel/runs",
+                     Modelsrv3 = "//modelsrv3/e$/opusgit/urbansim_data/data/psrc_parcel/runs"
+             )
 #base.ind.dir <- "/Volumes/d$/opusgit/urbansim_data/data/psrc_parcel/runs"
 #base.ind.dir <- "/Users/hana/d$/opusgit/urbansim_data/data/psrc_parcel/runs"
 #base.ind.dir <- "~/tmpind"
 
-wrkdir <- '/home/shiny/apps/' # shiny path
+# wrkdir <- '/home/shiny/apps/' # shiny path
 #wrkdir <- '/Users/hana/R/shinyserver/'
 #wrkdir <- '/Users/hana/psrc/R/shinyserver'
-# wrkdir <- 'C:/Users/CLam/Desktop/'
+wrkdir <- 'C:/Users/CLam/Desktop/'
 
 # scan for all directories in servers
 allruns <- list()
@@ -104,5 +108,11 @@ setkey(plantypes, plan_type_id)
 
 parcels <- merge(parcels, plantypes, all.x = TRUE)
 setkey(parcels, parcel_id)
+
+#### Adapted from https://redoakstrategic.com/geoshaper/ ---------------------
+parcels$secondLocationID <- paste(as.character(parcels$parcel_id), "_selectedLayer", sep = "")
+parcels[is.na(long), long := 0]
+parcels[is.na(lat), lat := 0]
+coordinates <- SpatialPointsDataFrame(parcels[,c('long', 'lat')], parcels)
 
 

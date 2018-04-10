@@ -46,7 +46,8 @@ navbarPage(theme = shinytheme("simplex"),
                                hr()
                         ),
                         column(width = 9,
-                               leafletOutput("map", height = "800px")
+                               leafletOutput("map", height = "700px"), 
+                               DT::dataTableOutput("dt", height = "100px")
                         ) # end column
                       ) # end fluidRow
                     ) # end fluidPage
