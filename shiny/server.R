@@ -48,9 +48,9 @@ function(input, output, session) {
       addDrawToolbar(targetGroup='Selected',
                      polylineOptions=FALSE,
                      markerOptions = FALSE,
-                     polygonOptions = drawPolygonOptions(shapeOptions=drawShapeOptions(fillOpacity = 0,color = 'white',weight = 3)),
-                     rectangleOptions = drawRectangleOptions(shapeOptions=drawShapeOptions(fillOpacity = 0,color = 'white',weight = 3)),
-                     circleOptions = drawCircleOptions(shapeOptions = drawShapeOptions(fillOpacity = 0,color = 'white',weight = 3)),
+                     polygonOptions = drawPolygonOptions(shapeOptions=drawShapeOptions(fillOpacity = 0,color = 'red',weight = 3)),
+                     rectangleOptions = drawRectangleOptions(shapeOptions=drawShapeOptions(fillOpacity = 0,color = 'red',weight = 3)),
+                     circleOptions = drawCircleOptions(shapeOptions = drawShapeOptions(fillOpacity = 0,color = 'red',weight = 3)),
                      editOptions = editToolbarOptions(edit = FALSE, selectedPathOptions = selectedPathOptions())
       )
   }  
@@ -59,17 +59,17 @@ function(input, output, session) {
 #### Adapted from https://redoakstrategic.com/geoshaper/ ---------------------  
   
   # store selections for tracking
-  data.of.click <- reactiveValues(clickedMarker = list(), #all parcels within boundaries (unfiltered)
-                                  selected = list()) #parcels matching sub.data.deb() (filtered)
+  data.of.click <- reactiveValues(clickedMarker = list(), # all coordinates within boundaries (unfiltered)
+                                  selected = list()) # parcels matching sub.data.deb() (filtered)
 
   observeEvent(input$map_draw_new_feature, {
-    #Only add new layers for bounded locations
+    # Only add new layers for bounded locations
     found_in_bounds <- findLocations(shape = input$map_draw_new_feature,
                                     location_coordinates = coordinates,
                                     location_id_colname = "parcel_id")
     
     for(id in found_in_bounds){
-      if(id %in%  data.of.click$clickedMarker){
+      if(id %in% data.of.click$clickedMarker){
         # don't add id
       } else {
         # add id
@@ -80,8 +80,8 @@ function(input, output, session) {
     # look up parcels by ids found
     data.of.click$selected <- subset(subset.data.deb(), parcel_id %in% data.of.click$clickedMarker)
     proxy <- leafletProxy("map")
-    proxy %>% 
-      addCircles(data = data.of.click$selected, 
+    proxy %>%
+      addCircles(data = data.of.click$selected,
                  lat = data.of.click$selected$lat,
                  lng = data.of.click$selected$long,
                  fillColor = "mediumseagreen",
@@ -111,23 +111,32 @@ function(input, output, session) {
                                                                  %in% first_layer_ids]
     }
     data.of.click$selected <- NULL
+    data.of.click$clickedMarker <- NULL
   })
   
   # Display summary table
   output$dt <- DT::renderDataTable({
     if (length(data.of.click$selected) == 0) return(NULL)
     data <- data.of.click$selected
-    # if (data > 0) {
-    #   data <- data.of.click$selected
-    #   browser()
-    # } 
     d <- data[, `:=`(du = residential_units.x, 
                      du_pcl_base = residential_units.y, 
                      non_res_sf = non_residential_sqft, 
                      non_res_pcl_base = nonres_building_sqft)
-              ][, lapply(.SD, sum), .SDcols = c("du", "du_pcl_base", "non_res_sf", "non_res_pcl_base")]
-    datatable(d)
-    
+              ]
+    if (input$checkbox_aggr) {
+      d1<- d[, .(num_parcels = .N, 
+            du = sum(du), 
+            du_pcl_base = sum(du_pcl_base), 
+            non_res_sf = sum(non_res_sf), 
+            non_res_pcl_base = sum(non_res_pcl_base))]
+    } else {
+      d1 <- d[, .(parcel_id, du, du_pcl_base, non_res_sf, non_res_pcl_base)]
+    }
+    # if (data > 0) {
+    #   data <- data.of.click$selected
+    # browser()
+    # }
+    datatable(d1)
   })
   
 #### End Adaptation from https://redoakstrategic.com/geoshaper/ --------------------- 

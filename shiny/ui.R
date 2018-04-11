@@ -46,7 +46,11 @@ navbarPage(theme = shinytheme("simplex"),
                                hr()
                         ),
                         column(width = 9,
-                               leafletOutput("map", height = "700px"), 
+                               leafletOutput("map", height = "670px"), 
+                               checkboxInput("checkbox_aggr", 
+                                             label = "Aggregate Table Records", 
+                                             value = FALSE, 
+                                             width = NULL),
                                DT::dataTableOutput("dt", height = "100px")
                         ) # end column
                       ) # end fluidRow
