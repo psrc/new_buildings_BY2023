@@ -9,6 +9,9 @@ library(geoshaper)
 library(sp)
 library(DT)
 
+# Shiny Server settings
+rund <- "/media/aws-prod-file01modeldata/vision2050/opusgit/urbansim_data/data/psrc_parcel/runs"
+rund2 <- "/media/aws-prod-file01modeldata2/vision2050/opusgit/urbansim_data/data/psrc_parcel/runs"
 base.ind.dir <- list(LAws01 = file.path(rund, "awsmodel01"),
                LAws02 = file.path(rund, "awsmodel02"),
                LAws03 = file.path(rund, "awsmodel03"),
