@@ -9,7 +9,23 @@ library(geoshaper)
 library(sp)
 library(DT)
 
-base.ind.dir <- list(Modelsrv5 = "/media/modelsrv5d/opusgit/urbansim_data/data/psrc_parcel/runs",
+base.ind.dir <- list(LAws01 = file.path(rund, "awsmodel01"),
+               LAws02 = file.path(rund, "awsmodel02"),
+               LAws03 = file.path(rund, "awsmodel03"),
+               LAws04 = file.path(rund, "awsmodel04"),
+               LAws05 = file.path(rund, "awsmodel05"),
+               LAws06 = file.path(rund, "awsmodel06"),
+               LAws07 = file.path(rund, "awsmodel07"),
+               LAws08 = file.path(rund, "awsmodel08"),
+               NAws01 = file.path(rund2, "awsmodel01"),
+               NAws02 = file.path(rund2, "awsmodel02"),
+               NAws03 = file.path(rund2, "awsmodel03"),
+               NAws04 = file.path(rund2, "awsmodel04"),
+               NAws05 = file.path(rund2, "awsmodel05"),
+               NAws06 = file.path(rund2, "awsmodel06"),
+               NAws07 = file.path(rund2, "awsmodel07"),
+               NAws08 = file.path(rund2, "awsmodel08"),
+			Modelsrv5 = "/media/modelsrv5d/opusgit/urbansim_data/data/psrc_parcel/runs",
                      Modelsrv6 = "/media/modelsrv6d/opusgit/urbansim_data/data/psrc_parcel/runs",
                      Modelsrv8 = "/media/modelsrv8d/opusgit/urbansim_data/data/psrc_parcel/runs",
                      Modelsrv3 = "/media/modelsrv3e/opusgit/urbansim_data/data/psrc_parcel/runs"
