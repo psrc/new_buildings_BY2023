@@ -37,7 +37,7 @@ function(input, output, session) {
     cluster.options <- NULL
     if(cluster) cluster.options <- markerClusterOptions()
     proxy %>% addCircleMarkers(data = selected.data,
-                               ~long,
+                               ~lon,
                                ~lat,
                                radius = 3,
                                popup = popup,
@@ -83,7 +83,7 @@ function(input, output, session) {
     proxy %>%
       addCircles(data = data.of.click$selected,
                  lat = data.of.click$selected$lat,
-                 lng = data.of.click$selected$long,
+                 lng = data.of.click$selected$lon,
                  fillColor = "mediumseagreen",
                  fillOpacity = 1,
                  color = "mediumseagreen",

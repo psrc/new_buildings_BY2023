@@ -41,9 +41,10 @@ base.ind.dir <- list(LAws01 = file.path(rund, "awsmodel01"),
 #base.ind.dir <- "/Volumes/d$/opusgit/urbansim_data/data/psrc_parcel/runs"
 #base.ind.dir <- "/Users/hana/d$/opusgit/urbansim_data/data/psrc_parcel/runs"
 #base.ind.dir <- "~/tmpind"
+#base.ind.dir <- list(local = '~/n$/vision2050/opusgit/urbansim_data/data/psrc_parcel/runs/awsmodel04')
 
 wrkdir <- '/home/shiny/apps/' # shiny path
-#wrkdir <- '/Users/hana/R/shinyserver/'
+#wrkdir <- '/Users/hana/psrc/R/shinyserver/'
 #wrkdir <- '/Users/hana/psrc/R/shinyserver'
 # wrkdir <- 'C:/Users/CLam/Desktop/'
 
@@ -61,23 +62,48 @@ bld.years <- c(2040, 2050)
 bld.filename <- paste0("building__dataset_table__new_buildings__", bld.years, ".tab") %>%
   paste(sep = "", collapse = "|")
 
-data <- 'parcel-viewer/data'
+data <- 'baseyear2018explorer/data'
 bld.data <- "new_buildings/data"
 
-parcel.main <- 'parcels2014.rds'
-parcel.att <- 'parcels_for_viewer.rds'
+parcel.main <- 'parcels_geo.rds'
+parcel.att <- 'parcels.rds'
+blds.base.file <- 'buildings.rds'
+hhs.file <- 'households.rds'
+jobs.file <- 'jobs.rds'
 
 parcels <- data.table(readRDS(file.path(wrkdir, data, parcel.main)))
 setkey(parcels, parcel_id)
-attr <- data.table(readRDS(file.path(wrkdir, data, parcel.att)))
-setkey(attr, parcel_id)
 
-parcels <- attr %>% merge(parcels, all.x=TRUE)
-parcels <- parcels[,-c(20:35)] # remove a few attributes to reduce size
-parcels[, c("max_dua", "max_far", "building_sqft") := NULL] # remove these columns as they'll come from the plan_types table
+buildings.base <- readRDS(file.path(wrkdir, data, blds.base.file))
 
-rm(attr)
+hhs <- readRDS(file.path(wrkdir, data, hhs.file))
+buildings.base[hhs[, .(.N, population=sum(persons)), by = "building_id"], 
+          `:=`(households = i.N, population = i.population), on = "building_id"][
+            is.na(households), `:=`(households = 0, population = 0)]
 
+jobs <- readRDS(file.path(wrkdir, data, jobs.file))
+buildings.base[jobs[, .N, by = "building_id"], jobs := i.N, on = "building_id"][is.na(jobs), jobs := 0]
+
+# add attributes to parcels
+parcels.attr <- data.table(readRDS(file.path(wrkdir, data, parcel.att)))
+parcels.attr[buildings.base[, .(households = sum(households), jobs = sum(jobs), 
+                           DU = sum(residential_units), nrsqft = sum(non_residential_sqft),
+                           pop = sum(population), Nblds = .N
+                                ), by = "parcel_id"], 
+                `:=`(households = i.households, jobs = i.jobs, residential_units = i.DU, 
+                     nonres_building_sqft = i.nrsqft, population = i.pop, Nblds = i.Nblds), 
+              on = "parcel_id"]
+setkey(parcels.attr, parcel_id)
+
+parcels <- parcels.attr %>% merge(parcels, all.x=TRUE)
+#browser()
+parcels <- parcels[,-c(17:35, 69)] # remove a few attributes to reduce size
+#parcels[, c("max_dua", "max_far", "building_sqft") := NULL] # remove these columns as they'll come from the plan_types table
+
+rm(parcels.attr)
+rm(buildings.base)
+rm(jobs)
+rm(hhs)
 building_types <- read.csv(file.path(wrkdir, bld.data, "building_types.csv"), stringsAsFactors = FALSE)[,c("building_type_id", "building_type_name")]
 ordered_building_type_names <- c("single_family_residential", "condo_residential", "multi_family_residential", 
                                  "commercial", "office", "industrial", "warehousing", "tcu")
@@ -129,8 +155,8 @@ setkey(parcels, parcel_id)
 
 #### Adapted from https://redoakstrategic.com/geoshaper/ ---------------------
 parcels$secondLocationID <- paste(as.character(parcels$parcel_id), "_selectedLayer", sep = "")
-parcels[is.na(long), long := 0]
+parcels[is.na(lon), lon := 0]
 parcels[is.na(lat), lat := 0]
-coordinates <- SpatialPointsDataFrame(parcels[,c('long', 'lat')], parcels)
+coordinates <- SpatialPointsDataFrame(parcels[,c('lon', 'lat')], parcels)
 
 
