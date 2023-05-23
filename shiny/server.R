@@ -152,7 +152,8 @@ function(input, output, session) {
     selectInput(inputId = "run",
                 label = "Run",
                 choices = allruns,
-                width = "100%")
+                width = "100%",
+                selected = selected.run)
   })
 
   # read buildings indicator data 

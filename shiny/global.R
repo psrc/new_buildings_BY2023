@@ -41,7 +41,7 @@ base.ind.dir <- list(#LAws01 = file.path(rund, "awsmodel01"),
 #base.ind.dir <- "/Volumes/d$/opusgit/urbansim_data/data/psrc_parcel/runs"
 #base.ind.dir <- "/Users/hana/d$/opusgit/urbansim_data/data/psrc_parcel/runs"
 #base.ind.dir <- "~/tmpind"
-#base.ind.dir <- list(local = '~/n$/vision2050/opusgit/urbansim_data/data/psrc_parcel/runs/awsmodel04')
+#base.ind.dir <- list(NAws04 = '~/n$/vision2050/opusgit/urbansim_data/data/psrc_parcel/runs/awsmodel04')
 
 wrkdir <- '/home/shiny/apps/' # shiny path
 #wrkdir <- '/Users/hana/psrc/R/shinyserver/'
@@ -57,6 +57,8 @@ for (b in 1:length(base.ind.dir)) {
   allruns[[length(allruns)+1]] <- dirlist
 }
 names(allruns) <- names(base.ind.dir) %>% toupper
+selected.run <- allruns[["NAWS04"]]["run_120.run_2023_05_11_12_57"] # LUVit run
+#selected.run <- allruns[[1]][1] # first run
 
 bld.years <- c(2040, 2050)
 bld.filename <- paste0("building__dataset_table__new_buildings__", bld.years, ".tab") %>%
