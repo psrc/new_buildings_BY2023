@@ -187,7 +187,7 @@ function(input, output, session) {
       values <- subdata[[color.attributes[input$color]]]
     }
     subdata[, color := NA]
-    if(nrow(subdata) > 0) subdata[, color:= do.call(palette.name, list(values))]
+    if(nrow(subdata) > 0 && length(unique(values)) > 1) subdata[, color:= do.call(palette.name, list(values))]
     subdata
   })
   
