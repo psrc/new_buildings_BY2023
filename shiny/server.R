@@ -225,7 +225,8 @@ function(input, output, session) {
       selectInput(inputId = "run_mu",
                   label = "Run",
                   choices = allruns,
-                  width = "100%")
+                  width = "100%",
+                  selected = selected.run)
   })
   
   # display initial map
@@ -251,7 +252,7 @@ function(input, output, session) {
       pcl[is.na(new_res_units), new_res_units:=0]
       pcl[is.na(new_nonres_sqft), new_nonres_sqft:=0]
       pcl[, nonres_share:= new_nonres_sqft/new_building_sqft]
-      pcl[, new_res_sqft := new_building_sqft-new_nonres_sqft]
+      pcl[, new_res_sqft := pmax(0, new_building_sqft-new_nonres_sqft)]
       pcl[new_nonres_sqft > 0 | new_res_units > 0]
   })
   
@@ -291,7 +292,7 @@ function(input, output, session) {
       marker.popup <- ~paste0("Parcel ID:  ", parcel_id, 
                               "<br>Non-res percent: ", as.integer(100*nonres_share),
                               "<br>DU:            ", as.integer(new_res_units),
-                              "<br>Residen sqft:  ", as.integer(new_res_sqft),
+                              "<br>Residential sqft:  ", as.integer(new_res_sqft),
                               "<br>Maximum DU/A:  ", round(max_dua,2),
                               "<br>Non-res sqft:  ", as.integer(new_nonres_sqft),
                               "<br>Maximum FAR:   ", round(max_far,2),

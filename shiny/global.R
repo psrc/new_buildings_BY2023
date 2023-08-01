@@ -43,10 +43,10 @@ base.ind.dir <- list(#LAws01 = file.path(rund, "awsmodel01"),
 #base.ind.dir <- "/Users/hana/d$/opusgit/urbansim_data/data/psrc_parcel/runs"
 #base.ind.dir <- "~/tmpind"
 #base.ind.dir <- list(NAws04 = '~/n$/vision2050/opusgit/urbansim_data/data/psrc_parcel/runs/awsmodel04')
+#base.ind.dir <- list(urbansim2 = "~/n$/vision2050/urbansim2/runs")
 
 wrkdir <- '/home/shiny/apps/' # shiny path
 #wrkdir <- '/Users/hana/psrc/R/shinyserver/'
-#wrkdir <- '/Users/hana/psrc/R/shinyserver'
 # wrkdir <- 'C:/Users/CLam/Desktop/'
 
 # scan for all directories in servers
@@ -119,7 +119,7 @@ color.attributes <- c("year"="year_built", "bt"="building_type_id",
                       "sizeres"="residential_units.x", "sizenonres"="non_residential_sqft")
 
 ########
-# Create a dataset of plan types from costraints table
+# Create a dataset of plan types from constraints table
 ########
 constr <- fread(file.path(wrkdir, bld.data, "development_constraints.csv"))
 setkey(constr, plan_type_id)
