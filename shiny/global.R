@@ -88,7 +88,7 @@ jobs <- readRDS(file.path(wrkdir, data, jobs.file))
 buildings.base[jobs[, .N, by = "building_id"], jobs := i.N, on = "building_id"][is.na(jobs), jobs := 0]
 
 # add attributes to parcels
-parcels.attr <- data.table(readRDS(file.path(wrkdir, data, parcel.att)))
+parcels.attr <- data.table(readRDS(file.path(wrkdir, data, parcel.att)))[, .(parcel_id, plan_type_id, parcel_sqft)]
 parcels.attr[buildings.base[, .(households = sum(households), jobs = sum(jobs), 
                            DU = sum(residential_units), nrsqft = sum(non_residential_sqft),
                            pop = sum(population), Nblds = .N
@@ -98,10 +98,9 @@ parcels.attr[buildings.base[, .(households = sum(households), jobs = sum(jobs),
               on = "parcel_id"]
 setkey(parcels.attr, parcel_id)
 
-parcels <- parcels.attr %>% merge(parcels, all.x=TRUE)
 #browser()
-parcels <- parcels[,-c(17:35, 69)] # remove a few attributes to reduce size
-#parcels[, c("max_dua", "max_far", "building_sqft") := NULL] # remove these columns as they'll come from the plan_types table
+parcels <- parcels.attr %>% merge(parcels, all.x=TRUE)
+
 
 rm(parcels.attr)
 rm(buildings.base)
