@@ -3,7 +3,7 @@ function(input, output, session) {
   # functions ---------------------------------------------------------------
   
   # Color palette
-  palette.year <- colorNumeric(c("black", "blue", "green", "yellow"), 2015:2050)
+  palette.year <- colorNumeric(c("black", "blue", "green", "yellow"), 2018:2050)
   palette.bt <- colorFactor(rainbow(nrow(building_types_selection)), 
                               levels=building_types_selection[,1])
 
@@ -197,7 +197,12 @@ function(input, output, session) {
   # display markers
   observe({
     data <- subset.data.deb()
-    if (is.null(data)) return()
+    if (is.null(data) || nrow(data) == 0) return()
+    if(!input$cluster){ # use jitter for parcels with duplicate buildings, so that they don't overlap one another
+      dupl.parcels <- unique(data[duplicated(data[, parcel_id]), parcel_id])
+      data[parcel_id %in% dupl.parcels, `:=`(lat = jitter(lat, factor = 0.2),
+                                             lon = jitter(lon, factor = 0.2))]
+    }
     marker.popup <- ~paste0("Parcel ID:  ", parcel_id, 
                             "<br>Bld ID:     ", as.integer(building_id), 
                             "<br>Year built: ", as.integer(year_built),
