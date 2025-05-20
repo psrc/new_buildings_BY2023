@@ -25,7 +25,7 @@ base.ind.dir <- list(#LAws01 = file.path(rund, "awsmodel01"),
                NAws03 = file.path(rund2, "awsmodel03"),
                NAws04 = file.path(rund2, "awsmodel04"),
                #NAws05 = file.path(rund2, "awsmodel05"),
-               #NAws06 = file.path(rund2, "awsmodel06"),
+               NAws06 = file.path(rund2, "awsmodel06"),
                #NAws07 = file.path(rund2, "awsmodel07"),
                #NAws08 = file.path(rund2, "awsmodel08"),
                urbansim2 = "/media/aws-prod-file01modeldata2/vision2050/urbansim2/runs"
@@ -50,7 +50,7 @@ for (b in 1:length(base.ind.dir)) {
   allruns[[length(allruns)+1]] <- dirlist
 }
 names(allruns) <- names(base.ind.dir) %>% toupper
-selected.run <- allruns[["NAWS04"]]["run_127.run_2024_12_30_15_35"] # 
+selected.run <- allruns[["NAWS04"]]["run_129.run_2025_04_04_10_19"] # 
 #selected.run <- allruns[[1]][1] # first run
 
 bld.years <- c(2040, 2050)
