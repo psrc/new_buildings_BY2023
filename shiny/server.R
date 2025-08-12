@@ -64,21 +64,38 @@ function(input, output, session) {
 
   observeEvent(input$map_draw_new_feature, {
     # Only add new layers for bounded locations
+    update.selection()
+  })
+  
+  draw.selection.data <- reactive({
+    if(is.null(input$map_draw_new_feature)) return(NULL)
     found_in_bounds <- findLocations(shape = input$map_draw_new_feature,
                                     location_coordinates = coordinates,
                                     location_id_colname = "parcel_id")
     
+    clickedM <- isolate(data.of.click$clickedMarker)
     for(id in found_in_bounds){
-      if(id %in% data.of.click$clickedMarker){
+      if(id %in%  clickedM){
         # don't add id
       } else {
         # add id
-        data.of.click$clickedMarker <- append(data.of.click$clickedMarker, id, 0)
+        clickedM <- append(clickedM, id, 0)
       }
     }
-   
     # look up parcels by ids found
-    data.of.click$selected <- subset(subset.data.deb(), parcel_id %in% data.of.click$clickedMarker)
+    dat <- subset.data.deb()
+    if(is.null(dat)) return()
+    subset(dat, parcel_id %in% clickedM)
+  })
+  
+  update.selection <- reactive({
+    dat <- draw.selection.data()
+    if(is.null(dat)) return(NULL)
+    
+    # look up parcels by ids found
+    data.of.click$selected <- dat
+    data.of.click$clickedMarker <- dat$parcel_id
+    
     proxy <- leafletProxy("map")
     proxy %>%
       addCircles(data = data.of.click$selected,
@@ -87,8 +104,9 @@ function(input, output, session) {
                  fillColor = "mediumseagreen",
                  fillOpacity = 1,
                  color = "mediumseagreen",
+                 popup = marker.popup(),
                  weight = 3,
-                 stroke = T,
+                 stroke = TRUE,
                  layerId = as.character(data.of.click$selected$secondLocationID),
                  highlightOptions = highlightOptions(color = "hotpink",
                                                      opacity = 1.0,
@@ -194,6 +212,16 @@ function(input, output, session) {
   
   subset.data.deb <- subset.data %>% debounce(1000) # causes some delay for collecting inputs
   
+  marker.popup <- function() ~paste0("Parcel ID:  ", parcel_id, 
+                                     "<br>Bld ID:     ", as.integer(building_id), 
+                                     "<br>Year built: ", as.integer(year_built),
+                                     "<br>Bld type:   ", building_type_name,
+                                     "<br>DU:         ", as.integer(residential_units.x),
+                                     "<br>DU pcl base: ", as.integer(residential_units.y),
+                                     "<br>Non-res sf: ", as.integer(non_residential_sqft),
+                                     "<br>NR pcl base: ", as.integer(nonres_building_sqft),
+                                     "<br>Unit price: ", round(unit_price, 2),
+                                     "<br>Template ID: ", as.integer(template_id))
   # display markers
   observe({
     data <- subset.data.deb()
@@ -203,17 +231,7 @@ function(input, output, session) {
       data[parcel_id %in% dupl.parcels, `:=`(lat = jitter(lat, factor = 0.2),
                                              lon = jitter(lon, factor = 0.2))]
     }
-    marker.popup <- ~paste0("Parcel ID:  ", parcel_id, 
-                            "<br>Bld ID:     ", as.integer(building_id), 
-                            "<br>Year built: ", as.integer(year_built),
-                            "<br>Bld type:   ", building_type_name,
-                            "<br>DU:         ", as.integer(residential_units.x),
-                            "<br>DU pcl base: ", as.integer(residential_units.y),
-                            "<br>Non-res sf: ", as.integer(non_residential_sqft),
-                            "<br>NR pcl base: ", as.integer(nonres_building_sqft),
-                            "<br>Unit price: ", round(unit_price, 2),
-                            "<br>Template ID: ", as.integer(template_id))
-    leaflet.results(leafletProxy("map"), data, marker.popup, 
+    leaflet.results(leafletProxy("map"), data, marker.popup(), 
                     add = input$timefilter == "cummulative" && !input$cluster,
                     cluster = input$cluster)
   })
