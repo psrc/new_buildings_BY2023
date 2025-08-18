@@ -203,7 +203,11 @@ function(input, output, session) {
   # display markers
   observe({
     data <- subset.data.deb()
-    if (is.null(data) || nrow(data) == 0) return()
+    if (is.null(data) || nrow(data) == 0) {
+      if(input$timefilter != "cummulative" || input$cluster)
+        leafletProxy("map") %>% clearMarkers() %>% clearMarkerClusters()
+      return()
+    }
     if(!input$cluster){ # use jitter for parcels with duplicate buildings, so that they don't overlap one another
       dupl.parcels <- unique(data[duplicated(data[, parcel_id]), parcel_id])
       data[parcel_id %in% dupl.parcels, `:=`(lat = jitter(lat, factor = 0.2),
