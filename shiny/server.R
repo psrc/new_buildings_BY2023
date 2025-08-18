@@ -44,7 +44,7 @@ function(input, output, session) {
                                fillOpacity=0.4,
                                color = ~color, 
                                clusterOptions = cluster.options
-      ) %>% #### Adapted from https://redoakstrategic.com/geoshaper/
+      ) %>% #### Adapted from https://blog.redoakstrategic.com/geoshaper
       addDrawToolbar(targetGroup='Selected',
                      polylineOptions=FALSE,
                      markerOptions = FALSE,
@@ -56,7 +56,7 @@ function(input, output, session) {
   }  
 
   
-#### Adapted from https://redoakstrategic.com/geoshaper/ ---------------------  
+#### Adapted from https://blog.redoakstrategic.com/geoshaper ---------------------  
   
   # store selections for tracking
   data.of.click <- reactiveValues(clickedMarker = list(), # all coordinates within boundaries (unfiltered)
@@ -68,19 +68,14 @@ function(input, output, session) {
   })
   
   draw.selection.data <- reactive({
-    if(is.null(input$map_draw_new_feature)) return(NULL)
-    found_in_bounds <- findLocations(shape = input$map_draw_new_feature,
+    clickedM <- isolate(data.of.click$clickedMarker) # points in all existing features
+    if(!is.null(input$map_draw_new_feature)) {
+      # add new feature
+      found_in_bounds <- findLocations(shape = input$map_draw_new_feature,
                                     location_coordinates = coordinates,
                                     location_id_colname = "parcel_id")
-    
-    clickedM <- isolate(data.of.click$clickedMarker)
-    for(id in found_in_bounds){
-      if(id %in%  clickedM){
-        # don't add id
-      } else {
-        # add id
-        clickedM <- append(clickedM, id, 0)
-      }
+      clickedM <- c(clickedM, found_in_bounds[!found_in_bounds %in% clickedM])
+      data.of.click$clickedMarker <- clickedM
     }
     # look up parcels by ids found
     dat <- subset.data.deb()
@@ -94,24 +89,6 @@ function(input, output, session) {
     
     # look up parcels by ids found
     data.of.click$selected <- dat
-    data.of.click$clickedMarker <- dat$parcel_id
-    
-    proxy <- leafletProxy("map")
-    proxy %>%
-      addCircles(data = data.of.click$selected,
-                 lat = data.of.click$selected$lat,
-                 lng = data.of.click$selected$lon,
-                 fillColor = "mediumseagreen",
-                 fillOpacity = 1,
-                 color = "mediumseagreen",
-                 popup = marker.popup(),
-                 weight = 3,
-                 stroke = TRUE,
-                 layerId = as.character(data.of.click$selected$secondLocationID),
-                 highlightOptions = highlightOptions(color = "hotpink",
-                                                     opacity = 1.0,
-                                                     weight = 2,
-                                                     bringToFront = TRUE))
   })
   
   observeEvent(input$map_draw_deleted_features,{
@@ -120,20 +97,21 @@ function(input, output, session) {
       # get ids for locations within the bounding shape
       bounded_layer_ids <- findLocations(shape = feature,
                                          location_coordinates = coordinates,
-                                         location_id_colname = "secondLocationID")
+                                         location_id_colname = "parcel_id")
       # remove second layer representing selected locations
-      proxy <- leafletProxy("map")
-      proxy %>% removeShape(layerId = as.character(bounded_layer_ids))
-      first_layer_ids <- subset(subset.data.deb(), secondLocationID %in% bounded_layer_ids)$locationID
+      #proxy <- leafletProxy("map")
+      #proxy %>% removeShape(layerId = as.character(bounded_layer_ids))
+      #first_layer_ids <- subset(data.of.click$selected, parcel_id %in% bounded_layer_ids)$locationID
       data.of.click$clickedMarker <- data.of.click$clickedMarker[!data.of.click$clickedMarker
-                                                                 %in% first_layer_ids]
+                                                                 %in% bounded_layer_ids]
     }
-    data.of.click$selected <- NULL
-    data.of.click$clickedMarker <- NULL
+    data.of.click$selected <- subset(subset.data.deb(), parcel_id %in% data.of.click$clickedMarker)
   })
   
   # Display summary table
   output$dt <- DT::renderDataTable({
+    update.selection()
+    #browser()
     if (length(data.of.click$selected) == 0) return(NULL)
     data <- data.of.click$selected
     d <- data[, `:=`(du = residential_units.x, 
@@ -231,6 +209,7 @@ function(input, output, session) {
       data[parcel_id %in% dupl.parcels, `:=`(lat = jitter(lat, factor = 0.2),
                                              lon = jitter(lon, factor = 0.2))]
     }
+    update.selection()
     leaflet.results(leafletProxy("map"), data, marker.popup(), 
                     add = input$timefilter == "cummulative" && !input$cluster,
                     cluster = input$cluster)
