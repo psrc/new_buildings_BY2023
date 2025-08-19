@@ -36,6 +36,7 @@ base.ind.dir <- list(#LAws01 = file.path(rund, "awsmodel01"),
 #base.ind.dir <- "~/tmpind"
 #base.ind.dir <- list(NAws04 = '~/n$/vision2050/opusgit/urbansim_data/data/psrc_parcel/runs/awsmodel04')
 #base.ind.dir <- list(urbansim2 = "~/n$/vision2050/urbansim2/runs")
+#base.ind.dir <- list(urbansim2 = "~/N/vision2050/urbansim2/runs")
 
 wrkdir <- '/home/shiny/apps/' # shiny path
 #wrkdir <- '/Users/hana/psrc/R/shinyserver/'

@@ -93,6 +93,7 @@ function(input, output, session) {
   
   observeEvent(input$map_draw_deleted_features,{
     # loop through list of one or more deleted features/ polygons
+      clickedM <- isolate(data.of.click$clickedMarker)
     for(feature in input$map_draw_deleted_features$features){
       # get ids for locations within the bounding shape
       bounded_layer_ids <- findLocations(shape = feature,
@@ -102,9 +103,9 @@ function(input, output, session) {
       #proxy <- leafletProxy("map")
       #proxy %>% removeShape(layerId = as.character(bounded_layer_ids))
       #first_layer_ids <- subset(data.of.click$selected, parcel_id %in% bounded_layer_ids)$locationID
-      data.of.click$clickedMarker <- data.of.click$clickedMarker[!data.of.click$clickedMarker
-                                                                 %in% bounded_layer_ids]
+      clickedM <- c(clickedM, bounded_layer_ids)
     }
+    data.of.click$clickedMarker <- data.of.click$clickedMarker[!data.of.click$clickedMarker %in% clickedM]
     data.of.click$selected <- subset(subset.data.deb(), parcel_id %in% data.of.click$clickedMarker)
   })
   
