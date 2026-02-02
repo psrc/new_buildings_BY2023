@@ -66,6 +66,7 @@ parcel.att <- 'parcels.rds'
 blds.base.file <- 'buildings.rds'
 hhs.file <- 'households.rds'
 jobs.file <- 'jobs.rds'
+parcel.cap <- 'parcels_capacity.rds' # optional
 
 parcels <- data.table(readRDS(file.path(wrkdir, data, parcel.main)))
 setkey(parcels, parcel_id)
@@ -90,6 +91,18 @@ parcels.attr[buildings.base[, .(households = sum(households), jobs = sum(jobs),
                      nonres_building_sqft = i.nrsqft, population = i.pop, Nblds = i.Nblds), 
               on = "parcel_id"]
 setkey(parcels.attr, parcel_id)
+
+# capacity
+if(file.exists((f <- file.path(wrkdir, data, parcel.cap)))){
+  cap <- readRDS(f) 
+  ratio <- 50/100
+  cap[, DUcap := ifelse(mixed_cap == 1, ratio * DUcap, DUcap)]
+  cap[, SQFTcap := ifelse(mixed_cap == 1, ratio * SQFTcap, SQFTcap)]
+  # join with parcel dataset
+  parcels.attr <- merge(parcels.attr, cap, by = "parcel_id", all.x = TRUE)
+} else {
+  parcels.attr[, `:=`(DUcap = 0, SQFTcap = 0, DUcap = 0, SQFTcap = 0)]
+}
 
 #browser()
 parcels <- parcels.attr %>% merge(parcels, all.x=TRUE)

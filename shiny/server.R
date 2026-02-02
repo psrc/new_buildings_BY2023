@@ -117,17 +117,24 @@ function(input, output, session) {
     data <- data.of.click$selected
     d <- data[, `:=`(du = residential_units.x, 
                      du_pcl_base = residential_units.y, 
+                     du_cap = DUcap,
                      non_res_sf = non_residential_sqft, 
-                     non_res_pcl_base = nonres_building_sqft)
+                     non_res_pcl_base = nonres_building_sqft,
+                     sqft_cap = SQFTcap
+                     )
               ]
     if (input$checkbox_aggr) {
       d1<- d[, .(num_parcels = .N, 
             du = sum(du, na.rm = TRUE), 
             du_pcl_base = sum(du_pcl_base, na.rm = TRUE), 
+            du_cap = round(sum(du_cap, na.rm = TRUE)),
             non_res_sf = sum(non_res_sf, na.rm = TRUE), 
-            non_res_pcl_base = sum(non_res_pcl_base, na.rm = TRUE))]
+            non_res_pcl_base = sum(non_res_pcl_base, na.rm = TRUE),
+            sqft_cap = round(sum(sqft_cap, na.rm = TRUE))
+            )]
     } else {
-      d1 <- d[, .(parcel_id, du, du_pcl_base, non_res_sf, non_res_pcl_base)]
+      d1 <- d[, .(parcel_id, du, du_pcl_base, du_cap = round(du_cap,1), 
+                  non_res_sf, non_res_pcl_base, sqft_cap = round(sqft_cap))]
     }
     # if (data > 0) {
     #   data <- data.of.click$selected
@@ -172,8 +179,10 @@ function(input, output, session) {
     subdata <- if(input$timefilter == "all") data[year_built <= as.integer(input$year)] else 
                   data[year_built == input$year]
     subdata <- subdata[building_type_id %in% as.integer(input$BTfilter)]
-    if(input$mixuse.chb)
-        subdata <- subdata[!is.na(N_res_con) & !is.na(N_nonres_con)]
+    if(input$mixuse.chb){
+        #subdata <- subdata[!is.na(N_res_con) & !is.na(N_nonres_con)]
+        subdata <- subdata[!is.na(N_res_con) & DUcap > 0 & !is.na(N_nonres_con) & SQFTcap > 0]
+    }
     if (is.null(subdata)) return()
     if(is.null(subdata[["template_id"]])) subdata[,template_id:=NA]
     if(input$color %in% c("sizeres", "sizenonres")) {
@@ -200,6 +209,8 @@ function(input, output, session) {
                                      "<br>Non-res sf: ", as.integer(non_residential_sqft),
                                      "<br>NR pcl base: ", as.integer(nonres_building_sqft),
                                      "<br>Unit price: ", round(unit_price, 2),
+                                     "<br>DUcap: ", round(DUcap,1),
+                                     "<br>SQFTcap: ", round(SQFTcap),
                                      "<br>Template ID: ", as.integer(template_id))
   # display markers
   observe({
