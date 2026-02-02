@@ -122,10 +122,10 @@ function(input, output, session) {
               ]
     if (input$checkbox_aggr) {
       d1<- d[, .(num_parcels = .N, 
-            du = sum(du), 
-            du_pcl_base = sum(du_pcl_base), 
-            non_res_sf = sum(non_res_sf), 
-            non_res_pcl_base = sum(non_res_pcl_base))]
+            du = sum(du, na.rm = TRUE), 
+            du_pcl_base = sum(du_pcl_base, na.rm = TRUE), 
+            non_res_sf = sum(non_res_sf, na.rm = TRUE), 
+            non_res_pcl_base = sum(non_res_pcl_base, na.rm = TRUE))]
     } else {
       d1 <- d[, .(parcel_id, du, du_pcl_base, non_res_sf, non_res_pcl_base)]
     }
